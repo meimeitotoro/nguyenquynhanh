@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Công cụ Đánh giá Mày đay | UCT & UAS7</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a2a3a;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #0d4f8c;
+      letter-spacing: 0.3px;
+    }
+
+    .header p {
+      font-size: 0.8rem;
+      color: #5a7a99;
+      margin-top: 4px;
+    }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      background: #dce8f5;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 20px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #4a6a8a;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: #0d4f8c;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(13,79,140,0.25);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Card */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0d4f8c;
+      margin-bottom: 4px;
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      color: #7a9ab8;
+      margin-bottom: 16px;
+    }
+
+    /* Questions */
+    .question-block {
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    .question-block:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .q-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1a2a3a;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .q-num {
+      display: inline-block;
+      background: #0d4f8c;
+      color: white;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 22px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1.5px solid #dce8f5;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 0.82rem;
+      color: #2a4a6a;
+    }
+
+    .option-label:hover {
+      border-color: #4a9ed4;
+      background: #f0f8ff;
+    }
+
+    .option-label input[type="radio"] {
+      margin-right: 10px;
+      accent-color: #0d4f8c;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .option-label.selected {
+      border-color: #0d4f8c;
+      background: #eaf3fc;
+    }
+
+    .score-badge {
+      margin-left: auto;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #4a9ed4;
+      background: #dce8f5;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    /* UAS7 Table */
+    .uas7-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .uas7-table th {
+      background: #0d4f8c;
+      color: white;
+      padding: 9px 8px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.78rem;
+    }
+
+    .uas7-table th:first-child { border-radius: 8px 0 0 0; text-align: left; }
+    .uas7-table th:last-child { border-radius: 0 8px 0 0; }
+
+    .uas7-table td {
+      padding: 8px 6px;
+      text-align: center;
+      border-bottom: 1px solid #eef2f7;
+      vertical-align: middle;
+    }
+
+    .uas7-table td:first-child {
+      text-align: left;
+      font-weight: 600;
+      color: #2a4a6a;
+      padding-left: 10px;
+      font-size: 0.8rem;
+    }
+
+    .uas7-table tr:nth-child(even) td { background: #f7fbff; }
+    .uas7-table tr:last-child td { border-bottom: none; }
+
+    .uas7-table select {
+      border: 1.5px solid #c8ddef;
+      border-radius: 6px;
+      padding: 5px 4px;
+      font-size: 0.78rem;
+      color: #1a2a3a;
+      background: white;
+      cursor: pointer;
+      width: 100%;
+      min-width: 52px;
+    }
+
+    .uas7-table select:focus {
+      outline: none;
+      border-color: #0d4f8c;
+    }
+
+    .daily-total {
+      font-weight: 700;
+      color: #0d4f8c;
+      font-size: 0.85rem;
+    }
+
+    /* Legend */
+    .legend-box {
+      background: #f7fbff;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      border: 1px solid #dce8f5;
+    }
+
+    .legend-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #4a6a8a;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 16px;
+    }
+
+    .legend-item {
+      font-size: 0.75rem;
+      color: #4a6a8a;
+    }
+
+    .legend-item span {
+      font-weight: 700;
+      color: #0d4f8c;
+    }
+
+    /* Buttons */
+    .calc-btn {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #0d4f8c, #1a7acc);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .calc-btn:hover {
+      background: linear-gradient(135deg, #0a3d6e, #1568b8);
+      box-shadow: 0 4px 12px rgba(13,79,140,0.3);
+    }
+
+    .reset-btn {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      color: #5a7a99;
+      border: 1.5px solid #c8ddef;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+      background: #f0f4f8;
+      color: #1a2a3a;
+    }
+
+    /* Result Box */
+    .result-box {
+      display: none;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-box.well { background: #e8f8ee; border: 2px solid #2ecc71; }
+    .result-box.mild { background: #fff8e1; border: 2px solid #f0c040; }
+    .result-box.moderate { background: #fff0e6; border: 2px solid #e8883a; }
+    .result-box.severe { background: #fdecea; border: 2px solid #e05252; }
+
+    .result-score {
+      font-size: 2.5rem;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .result-box.well .result-score { color: #1a9e50; }
+    .result-box.mild .result-score { color: #c09000; }
+    .result-box.moderate .result-score { color: #c06010; }
+    .result-box.severe .result-score { color: #c02020; }
+
+    .result-label {
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .result-box.well .result-label { color: #1a9e50; }
+    .result-box.mild .result-label { color: #c09000; }
+    .result-box.moderate .result-label { color: #c06010; }
+    .result-box.severe .result-label { color: #c02020; }
+
+    .result-interpretation {
+      font-size: 0.82rem;
+      color: #3a5a7a;
+      background: rgba(255,255,255,0.6);
+      border-radius: 8px;
+      padding: 10px 12px;
+      line-height: 1.5;
+    }
+
+    .result-interpretation strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #1a2a3a;
+      font-size: 0.83rem;
+    }
+
+    /* UAS7 breakdown */
+    .uas7-breakdown {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .day-chip {
+      background: rgba(255,255,255,0.7);
+      border-radius: 6px;
+      padding: 4px 2px;
+      text-align: center;
+      font-size: 0.7rem;
+    }
+
+    .day-chip .day-label { color: #7a9ab8; margin-bottom: 1px; }
+    .day-chip .day-score { font-weight: 700; color: #0d4f8c; font-size: 0.85rem; }
+
+    /* Reference table */
+    .ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-top: 10px;
+    }
+
+    .ref-table td, .ref-table th {
+      padding: 6px 10px;
+      border: 1px solid #dce8f5;
+    }
+
+    .ref-table th {
+      background: #eaf3fc;
+      font-weight: 700;
+      color: #0d4f8c;
+    }
+
+    .ref-table td:first-child { font-weight: 600; }
+
+    .dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    .dot-green { background: #2ecc71; }
+    .dot-yellow { background: #f0c040; }
+    .dot-orange { background: #e8883a; }
+    .dot-red { background: #e05252; }
+
+    .section-divider {
+      height: 1px;
+      background: #eef2f7;
+      margin: 16px 0;
+    }
+
+    .footnote {
+      font-size: 0.7rem;
+      color: #8aabb8;
+      text-align: center;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+      .legend-grid { grid-template-columns: 1fr; }
+      .uas7-breakdown { grid-template-columns: repeat(4, 1fr); }
+      .header h1 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>📋 Đánh giá Mức độ Mày đay</h1>
+    <p>Dành cho bác sĩ và dược sĩ lâm sàng • Chuyên khoa Da liễu</p>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('uct')">UCT<br><span style="font-weight:400;font-size:0.72rem">Kiểm soát mày đay</span></button>
+    <button class="tab-btn" onclick="switchTab('uas7')">UAS7<br><span style="font-weight:400;font-size:0.72rem">Mức độ hoạt động</span></button>
+    <button class="tab-btn" onclick="switchTab('ref')">Tham khảo<br><span style="font-weight:400;font-size:0.72rem">Phân loại & hướng dẫn</span></button>
+  </div>
+
+  <!-- ========== TAB UCT ========== -->
+  <div id="tab-uct" class="tab-content active">
+
+    <div class="card">
+      <div class="card-title">UCT — Urticaria Control Test</div>
+      <div class="card-subtitle">Đánh giá mức độ kiểm soát mày đay mạn tính trong 4 tuần qua • 4 câu hỏi • Tổng điểm 0–16</div>
+
+      <!-- Q1 -->
+      <div class="question-block">
+        <div class="q-label"><span class="q-num">1</span>Trong 4 tuần qua, bệnh nhân bị ảnh hưởng bởi các triệu chứng thể chất của mày đay (ngứa, mề đay, phù mạch) ở mức độ nào?</div>
+        <div class="options" id="uct-q1">
+          <label class="option-label"><input type="radio" name="uct1" value="0"> <span>Rất nhiều — triệu chứng rất nặng, liên tục</span><span class="score-badge">0đ</span></label>
+          <label class="option-label"><input type="radio" name="uct1" value="1"> <span>Nhiều — ảnh hưởng đáng kể</span><span class="score-badge">1đ</span></label>
+          <label class="option-label"><input type="radio" name="uct1" value="2"> <span>Trung bình — ảnh hưởng vừa phải</span><span class="score-badge">2đ</span></label>
+          <label class="option-label"><input type="radio" name="uct1" value="3"> <span>Ít — ảnh hưởng nhẹ</span><span class="score-badge">3đ</span></label>
+          <label class="option-label"><input type="radio" name="uct1" value="4"> <span>Không — không có triệu chứng thể chất</span><span class="score-badge">4đ</span></label>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="question-block">
+        <div class="q-label"><span class="q-num">2</span>Trong 4 tuần qua, mày đay ảnh hưởng đến cảm xúc và chất lượng cuộc sống của bệnh nhân ở mức độ nào?</div>
+        <div class="options" id="uct-q2">
+          <label class="option-label"><input type="radio" name="uct2" value="0"> <span>Rất nhiều — ảnh hưởng nghiêm trọng đến cảm xúc</span><span class="score-badge">0đ</span></label>
+          <label class="option-label"><input type="radio" name="uct2" value="1"> <span>Nhiều</span><span class="score-badge">1đ</span></label>
+          <label class="option-label"><input type="radio" name="uct2" value="2"> <span>Trung bình</span><span class="score-badge">2đ</span></label>
+          <label class="option-label"><input type="radio" name="uct2" value="3"> <span>Ít</span><span class="score-badge">3đ</span></label>
+          <label class="option-label"><input type="radio" name="uct2" value="4"> <span>Không — không ảnh hưởng đến cảm xúc</span><span class="score-badge">4đ</span></label>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="question-block">
+        <div class="q-label"><span class="q-num">3</span>Trong 4 tuần qua, bao nhiêu lần thuốc điều trị không đủ để kiểm soát các triệu chứng mày đay?</div>
+        <div class="options" id="uct-q3">
+          <label class="option-label"><input type="radio" name="uct3" value="0"> <span>Rất thường xuyên — gần như lúc nào cũng vậy</span><span class="score-badge">0đ</span></label>
+          <label class="option-label"><input type="radio" name="uct3" value="1"> <span>Thường xuyên</span><span class="score-badge">1đ</span></label>
+          <label class="option-label"><input type="radio" name="uct3" value="2"> <span>Đôi khi</span><span class="score-badge">2đ</span></label>
+          <label class="option-label"><input type="radio" name="uct3" value="3"> <span>Hiếm khi</span><span class="score-badge">3đ</span></label>
+          <label class="option-label"><input type="radio" name="uct3" value="4"> <span>Không lần nào — thuốc luôn kiểm soát tốt</span><span class="score-badge">4đ</span></label>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="question-block">
+        <div class="q-label"><span class="q-num">4</span>Nhìn chung, mày đay mạn tính của bệnh nhân được kiểm soát ở mức nào trong 4 tuần qua?</div>
+        <div class="options" id="uct-q4">
+          <label class="option-label"><input type="radio" name="uct4" value="0"> <span>Không được kiểm soát</span><span class="score-badge">0đ</span></label>
+          <label class="option-label"><input type="radio" name="uct4" value="1"> <span>Kiểm soát kém</span><span class="score-badge">1đ</span></label>
+          <label class="option-label"><input type="radio" name="uct4" value="2"> <span>Kiểm soát trung bình</span><span class="score-badge">2đ</span></label>
+          <label class="option-label"><input type="radio" name="uct4" value="3"> <span>Kiểm soát tốt</span><span class="score-badge">3đ</span></label>
+          <label class="option-label"><input type="radio" name="uct4" value="4"> <span>Kiểm soát hoàn toàn</span><span class="score-badge">4đ</span></label>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calcUCT()">Tính điểm UCT</button>
+      <button class="reset-btn" onclick="resetUCT()">↺ Làm lại</button>
+
+      <div id="uct-result" class="result-box"></div>
+    </div>
+
+    <p class="footnote">Nguồn: Weller K et al. Allergy. 2014;69(3):333–9 • UCT ≥ 12 = mày đay được kiểm soát tốt</p>
+  </div>
+
+  <!-- ========== TAB UAS7 ========== -->
+  <div id="tab-uas7" class="tab-content">
+
+    <div class="card">
+      <div class="card-title">UAS7 — Urticaria Activity Score (7 ngày)</div>
+      <div class="card-subtitle">Đánh giá hoạt động mày đay qua 7 ngày liên tiếp • Tổng điểm 0–42</div>
+
+      <div class="legend-box">
+        <div class="legend-title">Thang điểm mỗi ngày</div>
+        <div class="legend-grid">
+          <div>
+            <div class="legend-item" style="margin-bottom:6px;"><strong style="color:#0d4f8c">Số lượng mề đay (Wheals)</strong></div>
+            <div class="legend-item"><span>0</span> — Không có</div>
+            <div class="legend-item"><span>1</span> — Nhẹ (&lt;20 sẩn/24h)</div>
+            <div class="legend-item"><span>2</span> — Vừa (20–50 sẩn/24h)</div>
+            <div class="legend-item"><span>3</span> — Nặng (&gt;50 sẩn hoặc hợp lại)</div>
+          </div>
+          <div>
+            <div class="legend-item" style="margin-bottom:6px;"><strong style="color:#0d4f8c">Mức độ ngứa (Pruritus)</strong></div>
+            <div class="legend-item"><span>0</span> — Không ngứa</div>
+            <div class="legend-item"><span>1</span> — Nhẹ, không làm phiền</div>
+            <div class="legend-item"><span>2</span> — Vừa, ảnh hưởng sinh hoạt</div>
+            <div class="legend-item"><span>3</span> — Nặng, mất ngủ</div>
+          </div>
+        </div>
+      </div>
+
+      <table class="uas7-table">
+        <thead>
+          <tr>
+            <th>Ngày</th>
+            <th>Mề đay<br>(0–3)</th>
+            <th>Ngứa<br>(0–3)</th>
+            <th>Tổng<br>ngày</th>
+          </tr>
+        </thead>
+        <tbody id="uas7-body">
+        </tbody>
+      </table>
+
+      <button class="calc-btn" onclick="calcUAS7()" style="margin-top:16px;">Tính điểm UAS7</button>
+      <button class="reset-btn" onclick="resetUAS7()">↺ Làm lại</button>
+
+      <div id="uas7-result" class="result-box"></div>
+    </div>
+
+    <p class="footnote">Nguồn: Zuberbier T et al. Allergy. 2022;77(3):734–766 (EAACI/GA²LEN/EuroGuiDerm/APAAACI Guidelines)</p>
+  </div>
+
+  <!-- ========== TAB REFERENCE ========== -->
+  <div id="tab-ref" class="tab-content">
+
+    <div class="card">
+      <div class="card-title">Phân loại & Diễn giải UCT</div>
+      <div class="card-subtitle">Urticaria Control Test — 4 câu hỏi, tổng 0–16 điểm</div>
+      <table class="ref-table">
+        <thead>
+          <tr><th>Điểm UCT</th><th>Mức độ kiểm soát</th><th>Hành động lâm sàng</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="dot dot-red"></span>0–11</td>
+            <td>Kiểm soát kém</td>
+            <td>Xem xét leo thang điều trị (tăng liều kháng histamine, thêm omalizumab)</td>
+          </tr>
+          <tr>
+            <td><span class="dot dot-green"></span>12–16</td>
+            <td>Kiểm soát tốt</td>
+            <td>Duy trì phác đồ hiện tại, xem xét giảm liều sau 3–6 tháng ổn định</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.73rem;color:#8aabb8;margin-top:8px;">Ngưỡng cắt (cut-off): UCT = 12 | Độ nhạy 95%, Độ đặc hiệu 85% (Weller et al., 2014)</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Phân loại & Diễn giải UAS7</div>
+      <div class="card-subtitle">Urticaria Activity Score 7 — đánh giá 7 ngày, tổng 0–42 điểm</div>
+      <table class="ref-table">
+        <thead>
+          <tr><th>Điểm UAS7</th><th>Mức độ</th><th>Gợi ý xử trí</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="dot dot-green"></span>0</td>
+            <td>Không hoạt động</td>
+            <td>Xem xét giảm/ngừng điều trị theo dõi</td>
+          </tr>
+          <tr>
+            <td><span class="dot dot-green"></span>1–6</td>
+            <td>Kiểm soát tốt</td>
+            <td>Duy trì, đánh giá lại sau 4–8 tuần</td>
+          </tr>
+          <tr>
+            <td><span class="dot dot-yellow"></span>7–15</td>
+            <td>Nhẹ</td>
+            <td>Tối ưu kháng histamine H1 thế hệ 2</td>
+          </tr>
+          <tr>
+            <td><span class="dot dot-orange"></span>16–27</td>
+            <td>Trung bình</td>
+            <td>Tăng liều kháng histamine lên 2–4 lần; cân nhắc omalizumab</td>
+          </tr>
+          <tr>
+            <td><span class="dot dot-red"></span>28–42</td>
+            <td>Nặng</td>
+            <td>Omalizumab hoặc cyclosporine; cân nhắc hội chẩn</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Phác đồ điều trị mày đay mạn tính (EAACI 2022)</div>
+      <div class="card-subtitle">Điều trị bậc thang — đánh giá lại sau mỗi 4–6 tuần</div>
+      <div style="font-size:0.82rem;line-height:1.8;color:#2a4a6a;">
+        <div style="padding:8px 12px;border-left:3px solid #2ecc71;background:#f0faf4;border-radius:0 6px 6px 0;margin-bottom:8px;">
+          <strong>Bước 1</strong> — Kháng histamine H1 thế hệ 2 liều chuẩn<br>
+          <span style="color:#5a7a99;font-size:0.78rem">Cetirizine 10mg, Loratadine 10mg, Fexofenadine 180mg, Bilastine 20mg</span>
+        </div>
+        <div style="padding:8px 12px;border-left:3px solid #f0c040;background:#fffbf0;border-radius:0 6px 6px 0;margin-bottom:8px;">
+          <strong>Bước 2</strong> — Tăng liều kháng histamine H1 thế hệ 2 lên 2–4 lần<br>
+          <span style="color:#5a7a99;font-size:0.78rem">Không đáp ứng sau 2–4 tuần điều trị bước 1</span>
+        </div>
+        <div style="padding:8px 12px;border-left:3px solid #e8883a;background:#fff8f2;border-radius:0 6px 6px 0;margin-bottom:8px;">
+          <strong>Bước 3</strong> — Thêm Omalizumab 300mg SC mỗi 4 tuần<br>
+          <span style="color:#5a7a99;font-size:0.78rem">Không đáp ứng sau 1–3 tháng bước 2</span>
+        </div>
+        <div style="padding:8px 12px;border-left:3px solid #e05252;background:#fef6f6;border-radius:0 6px 6px 0;">
+          <strong>Bước 4</strong> — Cyclosporine A 3–5mg/kg/ngày hoặc phối hợp<br>
+          <span style="color:#5a7a99;font-size:0.78rem">Không đáp ứng omalizumab; theo dõi HA, creatinine chặt chẽ</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="footnote">Tài liệu tham khảo: Zuberbier T et al. Allergy. 2022 | Weller K et al. Allergy. 2014<br>Cập nhật lần cuối: 04/2026 • Bộ phận Dược lâm sàng</p>
+  </div>
+
+</div>
+
+<script>
+  // ---- Tab switching ----
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // ---- Highlight selected radio ----
+  document.addEventListener('change', function(e) {
+    if (e.target.type === 'radio') {
+      const name = e.target.name;
+      document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+        r.closest('.option-label').classList.remove('selected');
+      });
+      e.target.closest('.option-label').classList.add('selected');
+    }
+  });
+
+  // ---- UCT Calculator ----
+  function calcUCT() {
+    const vals = ['uct1','uct2','uct3','uct4'].map(n => {
+      const sel = document.querySelector(`input[name="${n}"]:checked`);
+      return sel ? parseInt(sel.value) : null;
+    });
+
+    if (vals.includes(null)) {
+      alert('⚠️ Vui lòng trả lời đầy đủ 4 câu hỏi trước khi tính điểm.');
+      return;
+    }
+
+    const total = vals.reduce((a, b) => a + b, 0);
+    const resultEl = document.getElementById('uct-result');
+
+    let cls, label, interp;
+    if (total >= 12) {
+      cls = 'well';
+      label = '✅ Mày đay được kiểm soát tốt';
+      interp = `<strong>Hướng xử trí:</strong> Duy trì phác đồ điều trị hiện tại. Xem xét giảm liều sau 3–6 tháng ổn định. Đánh giá lại UCT mỗi 4–8 tuần.`;
+    } else {
+      cls = 'severe';
+      label = '⚠️ Mày đay chưa được kiểm soát';
+      interp = `<strong>Hướng xử trí:</strong> Xem xét leo thang điều trị theo phác đồ EAACI 2022. Đánh giá lại tuân thủ thuốc và yếu tố khởi phát. Cân nhắc tăng liều kháng histamine hoặc bổ sung omalizumab.`;
+    }
+
+    resultEl.className = `result-box ${cls}`;
+    resultEl.innerHTML = `
+      <div class="result-score">${total}/16</div>
+      <div class="result-label">${label}</div>
+      <div class="result-interpretation">${interp}</div>
+    `;
+    resultEl.style.display = 'block';
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function resetUCT() {
+    document.querySelectorAll('input[name^="uct"]').forEach(r => r.checked = false);
+    document.querySelectorAll('#tab-uct .option-label').forEach(l => l.classList.remove('selected'));
+    const r = document.getElementById('uct-result');
+    r.style.display = 'none';
+  }
+
+  // ---- UAS7 Table Builder ----
+  const days = ['Ngày 1','Ngày 2','Ngày 3','Ngày 4','Ngày 5','Ngày 6','Ngày 7'];
+
+  function buildUAS7Table() {
+    const tbody = document.getElementById('uas7-body');
+    tbody.innerHTML = '';
+    days.forEach((d, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${d}</td>
+        <td>
+          <select id="w${i}" onchange="updateDayTotal(${i})">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </td>
+        <td>
+          <select id="p${i}" onchange="updateDayTotal(${i})">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </td>
+        <td class="daily-total" id="dt${i}">0</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateDayTotal(i) {
+    const w = parseInt(document.getElementById('w'+i).value);
+    const p = parseInt(document.getElementById('p'+i).value);
+    document.getElementById('dt'+i).textContent = w + p;
+  }
+
+  // ---- UAS7 Calculator ----
+  function calcUAS7() {
+    let total = 0;
+    let breakdown = [];
+    for (let i = 0; i < 7; i++) {
+      const w = parseInt(document.getElementById('w'+i).value);
+      const p = parseInt(document.getElementById('p'+i).value);
+      const d = w + p;
+      total += d;
+      breakdown.push(d);
+    }
+
+    const resultEl = document.getElementById('uas7-result');
+    let cls, label, interp;
+
+    if (total === 0) {
+      cls = 'well'; label = '✅ Không có hoạt động mày đay';
+      interp = `<strong>Hướng xử trí:</strong> Xem xét giảm hoặc ngừng điều trị theo dõi. Đánh giá lại sau 4 tuần.`;
+    } else if (total <= 6) {
+      cls = 'well'; label = '✅ Mày đay kiểm soát tốt';
+      interp = `<strong>Hướng xử trí:</strong> Duy trì phác đồ hiện tại. Đánh giá lại UAS7 sau 4–8 tuần. Xem xét giảm liều nếu duy trì ổn định ≥ 3 tháng.`;
+    } else if (total <= 15) {
+      cls = 'mild'; label = '🟡 Mày đay mức độ nhẹ';
+      interp = `<strong>Hướng xử trí:</strong> Tối ưu hóa kháng histamine H1 thế hệ 2. Đảm bảo dùng đúng liều, đúng giờ. Đánh giá lại sau 2–4 tuần.`;
+    } else if (total <= 27) {
+      cls = 'moderate'; label = '🟠 Mày đay mức độ trung bình';
+      interp = `<strong>Hướng xử trí:</strong> Tăng liều kháng histamine H1 thế hệ 2 lên 2–4 lần liều chuẩn. Cân nhắc omalizumab nếu không đáp ứng sau 4 tuần.`;
+    } else {
+      cls = 'severe'; label = '🔴 Mày đay mức độ nặng';
+      interp = `<strong>Hướng xử trí:</strong> Cân nhắc mạnh omalizumab 300mg SC/4 tuần. Nếu không đáp ứng: cyclosporine A 3–5mg/kg/ngày, theo dõi HA và creatinine. Hội chẩn chuyên gia nếu cần.`;
+    }
+
+    const chipHTML = breakdown.map((s, i) =>
+      `<div class="day-chip"><div class="day-label">N${i+1}</div><div class="day-score">${s}</div></div>`
+    ).join('');
+
+    resultEl.className = `result-box ${cls}`;
+    resultEl.innerHTML = `
+      <div class="result-score">${total}/42</div>
+      <div class="result-label">${label}</div>
+      <div class="uas7-breakdown">${chipHTML}</div>
+      <div class="result-interpretation">${interp}</div>
+    `;
+    resultEl.style.display = 'block';
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function resetUAS7() {
+    buildUAS7Table();
+    const r = document.getElementById('uas7-result');
+    r.style.display = 'none';
+  }
+
+  // ---- Init ----
+  buildUAS7Table();
+</script>
+</body>
+</html>
